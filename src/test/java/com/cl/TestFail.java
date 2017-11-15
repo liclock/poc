@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class TestFail
 {
-    @Test
+    @Test(enabled = false)
     public void testFail() throws Exception
     {
         DemoTest foo = new DemoTest();

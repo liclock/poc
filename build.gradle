@@ -1,10 +1,42 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
+        classpath "com.netflix.nebula:gradle-ospackage-plugin:4.5.1"
+    }
+}
+
+apply plugin: 'org.springframework.boot'
 apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    baseName = 'gs-spring-boot'
+    version =  '0.1.0'
+}
 
 repositories {
     mavenCentral()
 }
 
+/**
+ * Runs tests and creates a simple HelloWorld App
+ */
 dependencies {
+    // tag::jetty[]
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    // end::jetty[]
+    // tag::actuator[]
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    // end::actuator[]
     testCompile group: 'org.testng', name: 'testng', version: '6.8.+'
 }
 
@@ -12,4 +44,20 @@ test {
     // enable TestNG support (default is JUnit)
     useTestNG()
     include 'com/cl/**'
+}
+
+// Now it's time to package this guy up
+apply plugin: "nebula.ospackage"
+
+task fooDeb(type: Deb) {
+    packageName = 'hello-world'
+    version = '1.0.0'
+    release = 1
+
+    requires('default-jdk')
+
+    from(jar.outputs.files) {
+        into '/var/HelloWorld'
+    }
+
 }
