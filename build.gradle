@@ -2,10 +2,14 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "https://plugins.grdev.net/m2/"
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
         classpath "com.netflix.nebula:gradle-ospackage-plugin:4.5.1"
+        classpath "gradle.plugin.com.ewerk.gradle.plugins:artifactory-deb-publish-plugin:1.0.1"
     }
 }
 
@@ -54,10 +58,25 @@ task fooDeb(type: Deb) {
     version = '1.0.0'
     release = 1
 
-    requires('default-jdk')
+    //requires('default-jdk')
+    requires('openssh-server')
+    requires('openjdk-8-jre')
 
     from(jar.outputs.files) {
         into '/var/HelloWorld'
     }
 
+}
+
+apply plugin: "com.ewerk.gradle.plugins.artifactory-deb-publish"
+
+artifactoryDebPublish {
+    baseUrl = 'https://artifactory.cloudlock.com:443'
+    user = "${artifactory_user}"
+    password = "${artifactory_password}"
+    repoKey = 'deb-cl-sandbox'
+    distribution = 'trusty'
+    component = 'hello-world'
+    arch = 'all'
+    archive = file('build/distributions/hello-world_1.0.0-1_all.deb')
 }
